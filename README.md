@@ -1,20 +1,20 @@
 # Zadachi
 
-**Personal task lists in Obsidian. One list per Markdown note.**
+**Task lists that live in your Obsidian notes.**
 
 English · [Русский](README.ru.md)
 
-Give work, home, and side projects their own lists. Open a list from the file explorer and work with it in a regular Obsidian tab. Your tasks stay in your vault and are readable as Markdown even when Zadachi is disabled.
+Create a task list in any folder, give it a name, and start adding tasks. Each list is a Markdown note you can move or rename.
+
+Mark a task **Urgent**, **Important**, both, or neither. Zadachi sorts tasks into four groups based on [Stephen Covey’s time management matrix](https://mp.franklincovey.com/habit-3/).
 
 ![Zadachi showing a project task list, priority groups, and an archive tab](docs/media/task-list.png)
 
 Screenshots and demos use sample tasks in a browser preview.
 
-[Install](#install) · [Create your first list](#create-your-first-list) · [Reorder tasks](#reorder-tasks) · [Where tasks are stored](#where-tasks-are-stored)
-
 ## Install
 
-1. Download `zadachi-1.0.0.zip` from [GitHub Releases](https://github.com/bu4ak/zadachi/releases).
+1. Download [zadachi-1.0.0.zip](https://github.com/bu4ak/zadachi/releases/download/1.0.0/zadachi-1.0.0.zip).
 2. Extract the `zadachi` folder into `<your vault>/.obsidian/plugins/`. It should contain `main.js`, `manifest.json`, and `styles.css`.
 3. Restart Obsidian and enable **Zadachi** in **Settings → Community plugins**.
 
@@ -28,15 +28,11 @@ The manifest requires Obsidian 1.8.7 or later. The lowest verified version in th
 
 ![Create a Markdown task list and add a task](docs/media/create-list.gif)
 
-[Open the creation demo](docs/media/create-list.gif) to replay it.
-
 ## Reorder tasks
 
 Drag a task by the six-dot handle within its priority group. The gap shows where the task will land. With the handle focused, use **Alt + ↑** or **Alt + ↓** to move it. To change its group, click the task title and edit its priority.
 
 ![Drag a task up within its priority group](docs/media/reorder.gif)
-
-[Open the reorder demo](docs/media/reorder.gif) to replay it.
 
 ## Complete and find tasks
 
@@ -44,8 +40,6 @@ Drag a task by the six-dot handle within its priority group. The gap shows where
 - Tick a task to move it to **Archive**. Untick it there to return it to **Tasks**.
 - Delete one archived task or clear the archive after confirmation. **Undo** is available for seven seconds.
 - Search by title or note in the current tab. Click a priority group's heading to collapse or expand it.
-
-[See the archive](docs/media/archive.png).
 
 ## Where tasks are stored
 
