@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const state = vi.hoisted(() => ({ useRealStore: false, appLanguage: 'ru' }));
+const state = vi.hoisted(() => ({ useRealStore: false, appLanguage: 'ru', supportsDeclarativeSettings: false }));
 
 vi.mock('obsidian', () => {
   class Plugin {
@@ -94,7 +94,8 @@ vi.mock('obsidian', () => {
   }
   const normalizePath = (path: string) => path;
   const getLanguage = () => state.appLanguage;
-  return { Plugin, PluginSettingTab, Notice, Setting, TFile, TFolder, MarkdownView, normalizePath, getLanguage };
+  const requireApiVersion = (version: string) => version === '1.13.0' && state.supportsDeclarativeSettings;
+  return { Plugin, PluginSettingTab, Notice, Setting, TFile, TFolder, MarkdownView, normalizePath, getLanguage, requireApiVersion };
 });
 
 describe('Отдельные файлы списков', () => {
@@ -460,7 +461,13 @@ function fixture() {
 }
 
 let f: Fixture;
-beforeEach(async () => { state.useRealStore = false; state.appLanguage = 'ru'; f = fixture(); await f.plugin.onload(); });
+beforeEach(async () => {
+  state.useRealStore = false;
+  state.appLanguage = 'ru';
+  state.supportsDeclarativeSettings = false;
+  f = fixture();
+  await f.plugin.onload();
+});
 
 describe('Подключение к Obsidian', () => {
   it('регистрирует панель, кнопку ленты и четыре команды', () => {
@@ -575,14 +582,16 @@ describe('Подключение к Obsidian', () => {
   it.each(['legacy', 'declarative'])('переводит настройки и сохраняет черновик пути (%s)', async mode => {
     const tab = f.plugin.settingTab;
     const container = tab.containerEl as HTMLElement;
+    const update = vi.fn(() => {
+      container.replaceChildren();
+      for (const definition of tab.getSettingDefinitions()) {
+        definition.render(new Setting(container).setName(definition.name).setDesc(definition.desc));
+      }
+    });
     if (mode === 'declarative') {
-      tab.update = () => {
-        container.replaceChildren();
-        for (const definition of tab.getSettingDefinitions()) {
-          definition.render(new Setting(container).setName(definition.name).setDesc(definition.desc));
-        }
-      };
-      tab.update();
+      state.supportsDeclarativeSettings = true;
+      tab.update = update;
+      update();
     } else tab.display();
     const path = container.querySelector<HTMLInputElement>('input')!;
     path.value = 'Проекты/Черновик.md';
@@ -594,6 +603,7 @@ describe('Подключение к Obsidian', () => {
     expect(container.querySelector<HTMLInputElement>('input')!.value).toBe('Проекты/Черновик.md');
     expect(container.querySelector<HTMLSelectElement>('select')!.value).toBe('en');
     expect(f.plugin.settings.storagePath).toBe('Задачи.md');
+    expect(update).toHaveBeenCalledTimes(mode === 'declarative' ? 2 : 0);
   });
 
   it('возвращает прежний выбор в настройках при ошибке записи', async () => {

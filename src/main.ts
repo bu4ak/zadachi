@@ -1,4 +1,4 @@
-import { getLanguage, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, WorkspaceLeaf, type Command } from 'obsidian';
+import { getLanguage, Notice, Plugin, PluginSettingTab, requireApiVersion, Setting, TFile, TFolder, WorkspaceLeaf, type Command } from 'obsidian';
 import { TaskStore, validateStoragePath } from './store';
 import { TaskView } from './view';
 import { TaskTab, VIEW_TYPE } from './types';
@@ -315,7 +315,7 @@ class ZadachiSettingTab extends PluginSettingTab {
   display(): void { this.renderLegacySettings(); }
 
   private refreshSettings(): void {
-    if ('update' in this && typeof this.update === 'function') this.update();
+    if (requireApiVersion('1.13.0')) this.update();
     else this.renderLegacySettings();
   }
 
