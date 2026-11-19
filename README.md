@@ -1,12 +1,8 @@
 # Zadachi
 
-**Task lists that live in your Obsidian notes.**
-
 English · [Русский](README.ru.md)
 
-Create a task list in any folder, give it a name, and start adding tasks. Each list is a Markdown note you can move or rename.
-
-Mark a task **Urgent**, **Important**, both, or neither. Zadachi sorts tasks into the four groups of the [Eisenhower matrix](https://en.wikipedia.org/wiki/Time_management#Eisenhower_method), a method popularized by Stephen Covey.
+Mark tasks **Urgent**, **Important**, or both. Zadachi sorts them into four groups so you can see what to tackle first.
 
 ![Zadachi showing a project task list, priority groups, and an archive tab](docs/media/task-list.png)
 
@@ -14,9 +10,9 @@ Screenshots and demos use sample tasks in a browser preview.
 
 ## Install
 
-1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/bu4ak/zadachi/releases/latest).
-2. Put the three files in `<your vault>/.obsidian/plugins/zadachi/`. Create the folder if needed.
-3. Restart Obsidian and enable **Zadachi** in **Settings → Community plugins**.
+In Obsidian, open **Settings → Community plugins → Browse** and search for **Zadachi**. Select **Install**, then **Enable**.
+
+[Zadachi in the Obsidian catalog](https://community.obsidian.md/plugins/zadachi)
 
 Requires Obsidian 1.8.7 or later. Tested on macOS and in an Android 11 emulator with Obsidian 1.8.7. iOS has not been tested.
 
