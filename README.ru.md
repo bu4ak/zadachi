@@ -14,11 +14,11 @@
 
 ## Установка
 
-1. Скачайте [zadachi-1.0.0.zip](https://github.com/bu4ak/zadachi/releases/download/1.0.0/zadachi-1.0.0.zip).
+1. Скачайте [zadachi-1.0.1.zip](https://github.com/bu4ak/zadachi/releases/download/1.0.1/zadachi-1.0.1.zip).
 2. Распакуйте папку `zadachi` в `<хранилище>/.obsidian/plugins/`. Внутри должны быть `main.js`, `manifest.json` и `styles.css`.
 3. Перезапустите Obsidian и включите **Zadachi** в разделе **Настройки → Сторонние плагины**.
 
-В манифесте указан Obsidian 1.8.7 или новее. Самая ранняя версия, проверенная в настольном приложении, — 1.15.1. На мобильном устройстве плагин пока не проверяли.
+Требуется Obsidian 1.8.7 или новее. Проверили Obsidian 1.8.7 на macOS и в эмуляторе Android 11. iOS пока не проверяли.
 
 ## Первый список
 
