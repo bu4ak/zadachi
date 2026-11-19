@@ -15,8 +15,8 @@ export function validateStoragePath(input: string): string {
 
 function newId(): string {
   const bytes = new Uint8Array(16);
-  if (!globalThis.crypto?.getRandomValues) throw new LocalizedError('idFailed');
-  globalThis.crypto.getRandomValues(bytes);
+  if (typeof crypto === 'undefined' || typeof crypto.getRandomValues !== 'function') throw new LocalizedError('idFailed');
+  crypto.getRandomValues(bytes);
   bytes[6] = (bytes[6] & 0x0f) | 0x40;
   bytes[8] = (bytes[8] & 0x3f) | 0x80;
   const hex = [...bytes].map(byte => byte.toString(16).padStart(2, '0')).join('');
@@ -209,12 +209,12 @@ export class TaskStore implements TaskService {
       }
       await this.loadNow(true);
       if (this.snapshot.error) {
-        const cause = this.snapshot.errorCause ?? new LocalizedError('unknownError');
+        const cause = this.snapshot.errorCause;
         if (path !== previousPath) {
           this.path = previousPath;
           this.publish(previousSnapshot);
         }
-        throw cause;
+        throw cause instanceof Error ? cause : new LocalizedError('unknownError', {}, cause);
       }
     });
   }

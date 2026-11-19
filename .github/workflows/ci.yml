@@ -28,22 +28,31 @@ jobs:
       - name: Check release tag
         if: github.ref_type == 'tag'
         run: node -e 'const m = require("./manifest.json"); if (m.version !== process.env.GITHUB_REF_NAME) throw new Error("Tag must match manifest version");'
-      - name: Package manual installation
-        if: github.ref_type == 'tag'
-        run: |
-          mkdir -p dist/zadachi
-          cp main.js manifest.json styles.css LICENSE dist/zadachi/
-          cd dist
-          zip -q -r "zadachi-${GITHUB_REF_NAME}.zip" zadachi
       - name: Save release files
         if: github.ref_type == 'tag'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: zadachi-release
           path: |
             main.js
             manifest.json
             styles.css
-            LICENSE
-            dist/*.zip
           if-no-files-found: error
+
+  attest-release:
+    if: github.ref_type == 'tag'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: zadachi-release
+      - uses: actions/attest@v4
+        with:
+          subject-path: |
+            main.js
+            styles.css

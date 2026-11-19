@@ -101,13 +101,13 @@ function flowRects(rows: readonly HTMLElement[], groupTop: number): void {
   for (const row of rows) {
     row.getBoundingClientRect = () => {
       let top = groupTop;
-      if (row.style.position === 'fixed') top = parseFloat(row.style.top);
+      if (row.classList.contains('is-dragging')) top = parseFloat(row.style.top);
       else {
         for (const child of Array.from(row.parentElement!.children)) {
           if (child === row) break;
           const item = child as HTMLElement;
           if (item.classList.contains('zadachi-drag-placeholder')) top += parseFloat(item.style.height);
-          else if (item.classList.contains('zadachi-row') && item.style.position !== 'fixed') top += 40;
+          else if (item.classList.contains('zadachi-row') && !item.classList.contains('is-dragging')) top += 40;
         }
       }
       return { x: 0, y: top, top, bottom: top + 40, left: 0, right: 300, width: 300, height: 40, toJSON: () => ({}) };
@@ -328,7 +328,7 @@ describe('Панель задач', () => {
     service.moveTask.mockImplementationOnce(async (...args) => {
       expect(view.containerEl.querySelector('.zadachi-drag-placeholder, .is-dragging')).toBeNull();
       expect(rows[2].style.position).toBe('');
-      expect(rows[2].style.transform).toBe('');
+      expect(rows[2].style.getPropertyValue('--zadachi-drag-offset')).toBe('');
       await saveMove(...args);
     });
     handle.focus();
@@ -339,8 +339,7 @@ describe('Панель задач', () => {
     expect(placeholder.nextElementSibling).toBe(rows[0]);
     expect(placeholder.style.height).toBe('40px');
     expect(rows[2].classList.contains('is-dragging')).toBe(true);
-    expect(rows[2].style.position).toBe('fixed');
-    expect(rows[2].style.transform).toContain('-90px');
+    expect(rows[2].style.getPropertyValue('--zadachi-drag-offset')).toContain('-90px');
     expect(document.querySelector('.zadachi-drag-ghost')).toBeNull();
     expect(handle.hasAttribute('aria-label')).toBe(false);
     expect(handle.hasAttribute('title')).toBe(false);
@@ -353,7 +352,7 @@ describe('Панель задач', () => {
     expect(document.querySelector('.zadachi-drag-ghost')).toBeNull();
     expect(view.containerEl.querySelector('.is-dragging, .zadachi-drag-placeholder')).toBeNull();
     expect(rows[2].style.position).toBe('');
-    expect(rows[2].style.transform).toBe('');
+    expect(rows[2].style.getPropertyValue('--zadachi-drag-offset')).toBe('');
     expect(document.activeElement).toBe(handle);
     expect(view.containerEl.querySelector('[role="status"].zadachi-sr-only')?.textContent).toContain('позиция 1 из 3');
     await view.onClose();
@@ -374,7 +373,7 @@ describe('Панель задач', () => {
     const expectClean = () => {
       expect(view.containerEl.querySelector('.zadachi-drag-placeholder, .is-dragging')).toBeNull();
       expect(rows[1].style.position).toBe('');
-      expect(rows[1].style.transform).toBe('');
+      expect(rows[1].style.getPropertyValue('--zadachi-drag-offset')).toBe('');
     };
     begin();
     pointer(document, 'pointerup', 250, 160);
@@ -468,7 +467,7 @@ describe('Панель задач', () => {
     await view.onClose();
     expect(moving.classList.contains('is-dragging')).toBe(false);
     expect(moving.style.position).toBe('');
-    expect(moving.style.transform).toBe('');
+    expect(moving.style.getPropertyValue('--zadachi-drag-offset')).toBe('');
     pointer(document, 'pointerup', 250, 10);
     expect(service.moveTask).not.toHaveBeenCalled();
   });
@@ -503,7 +502,7 @@ describe('Панель задач', () => {
     expect(document.querySelector('.zadachi-drag-ghost')).toBeNull();
     expect(view.containerEl.querySelector('.zadachi-drag-placeholder, .is-dragging')).toBeNull();
     expect(rows[1].style.position).toBe('');
-    expect(rows[1].style.transform).toBe('');
+    expect(rows[1].style.getPropertyValue('--zadachi-drag-offset')).toBe('');
     await view.onClose();
   });
 

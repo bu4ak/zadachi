@@ -6,16 +6,10 @@ export function createPriorityToggle(
   pressed: boolean,
   onChange?: (pressed: boolean) => void,
 ) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = `zadachi-flag zadachi-flag-${kind}`;
-  const icon = document.createElement('span');
-  icon.className = 'zadachi-flag-icon';
-  icon.setAttribute('aria-hidden', 'true');
+  const button = createEl('button', { attr: { type: 'button' }, cls: `zadachi-flag zadachi-flag-${kind}` });
+  const icon = button.createSpan({ cls: 'zadachi-flag-icon', attr: { 'aria-hidden': 'true' } });
   setIcon(icon, kind === 'urgent' ? 'zap' : 'star');
-  const label = document.createElement('span');
-  label.textContent = text;
-  button.append(icon, label);
+  const label = button.createSpan({ text });
   const toggle = {
     button,
     label,

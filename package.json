@@ -1,6 +1,6 @@
 {
   "name": "obsidian-zadachi",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Personal task lists stored in Markdown notes.",
   "private": true,
   "license": "MIT",

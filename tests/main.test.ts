@@ -398,7 +398,7 @@ vi.mock('../src/view', () => {
 
 import ZadachiPlugin from '../src/main';
 import { VIEW_TYPE } from '../src/types';
-import { MarkdownView, TFile, TFolder } from 'obsidian';
+import { MarkdownView, Setting, TFile, TFolder } from 'obsidian';
 
 type Fixture = ReturnType<typeof fixture>;
 function fixture() {
@@ -413,6 +413,7 @@ function fixture() {
     activeLeaf: null as any,
     getLeavesOfType: vi.fn((type: string): any[] => leaves.filter(leaf => leaf.view?.getViewType?.() === type)),
     getActiveFile: vi.fn(() => workspace.activeLeaf?.view?.file ?? null),
+    getActiveViewOfType: vi.fn((type: typeof TaskView) => workspace.activeLeaf?.view instanceof type ? workspace.activeLeaf.view : null),
     getRightLeaf: vi.fn(),
     getLeaf: vi.fn(),
     revealLeaf: vi.fn(async () => {}),
@@ -571,9 +572,18 @@ describe('Подключение к Obsidian', () => {
     expect(f.plugin.commands[1].name).toBe('Zadachi: Быстро добавить');
   });
 
-  it('переводит настройки после выбора языка и сохраняет черновик пути', async () => {
-    f.plugin.settingTab.display();
-    const container = f.plugin.settingTab.containerEl as HTMLElement;
+  it.each(['legacy', 'declarative'])('переводит настройки и сохраняет черновик пути (%s)', async mode => {
+    const tab = f.plugin.settingTab;
+    const container = tab.containerEl as HTMLElement;
+    if (mode === 'declarative') {
+      tab.update = () => {
+        container.replaceChildren();
+        for (const definition of tab.getSettingDefinitions()) {
+          definition.render(new Setting(container).setName(definition.name).setDesc(definition.desc));
+        }
+      };
+      tab.update();
+    } else tab.display();
     const path = container.querySelector<HTMLInputElement>('input')!;
     path.value = 'Проекты/Черновик.md';
     path.dispatchEvent(new Event('input', { bubbles: true }));

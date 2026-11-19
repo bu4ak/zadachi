@@ -14,8 +14,8 @@ Screenshots and demos use sample tasks in a browser preview.
 
 ## Install
 
-1. Download [zadachi-1.0.1.zip](https://github.com/bu4ak/zadachi/releases/download/1.0.1/zadachi-1.0.1.zip).
-2. Extract the `zadachi` folder into `<your vault>/.obsidian/plugins/`. It should contain `main.js`, `manifest.json`, and `styles.css`.
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/bu4ak/zadachi/releases/latest).
+2. Put the three files in `<your vault>/.obsidian/plugins/zadachi/`. Create the folder if needed.
 3. Restart Obsidian and enable **Zadachi** in **Settings → Community plugins**.
 
 Requires Obsidian 1.8.7 or later. Tested on macOS and in an Android 11 emulator with Obsidian 1.8.7. iOS has not been tested.

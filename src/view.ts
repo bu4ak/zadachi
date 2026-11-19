@@ -20,10 +20,7 @@ const GROUPS = [
 let nextViewId = 0;
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', text?: string): HTMLElementTagNameMap[K] {
-  const node = document.createElement(tag);
-  node.className = cls;
-  if (text !== undefined) node.textContent = text;
-  return node;
+  return createEl(tag, { cls, text });
 }
 
 function iconButton(label: string, icon: string, cls: string): HTMLButtonElement {
@@ -115,7 +112,7 @@ function reconcileChildren(parent: HTMLElement, wanted: readonly HTMLElement[]):
 }
 
 export interface TaskFileServices {
-  acquire(file: TFile): { service: TaskService; release(): void };
+  acquire(file: TFile): { service: TaskService; release: () => void };
   defaultPath(): string;
   openMarkdown(leaf: WorkspaceLeaf, file: TFile): Promise<void>;
 }
@@ -219,7 +216,7 @@ export class TaskView extends EditableFileView {
     await super.onRename(file);
   }
 
-  onPaneMenu(menu: Menu, source: 'more-options' | 'tab-header' | string): void {
+  onPaneMenu(menu: Menu, source: string): void {
     super.onPaneMenu(menu, source);
     const file = this.file;
     if (this.files && file) menu.addItem(item => item.setTitle(this.i18n.t('openMarkdown')).setIcon('file-text').onClick(() => {
@@ -320,7 +317,7 @@ export class TaskView extends EditableFileView {
     this.activeTab.setAttribute('role', 'tab');
     this.activeTab.id = `zadachi-active-${this.viewId}`;
     this.activeTab.setAttribute('aria-controls', `zadachi-panel-${this.viewId}`);
-    this.activeTab.append(document.createTextNode(this.i18n.t('active')));
+    this.activeTab.append(this.i18n.t('active'));
     this.activeCount = el('span', 'zadachi-tab-count', '0');
     this.activeTab.appendChild(this.activeCount);
     this.activeTab.addEventListener('click', () => this.selectTab('active'));
@@ -329,7 +326,7 @@ export class TaskView extends EditableFileView {
     this.archiveTab.setAttribute('role', 'tab');
     this.archiveTab.id = `zadachi-archive-${this.viewId}`;
     this.archiveTab.setAttribute('aria-controls', `zadachi-panel-${this.viewId}`);
-    this.archiveTab.append(document.createTextNode(this.i18n.t('archive')));
+    this.archiveTab.append(this.i18n.t('archive'));
     this.archiveCount = el('span', 'zadachi-tab-count', '0');
     this.archiveTab.appendChild(this.archiveCount);
     this.archiveTab.addEventListener('click', () => this.selectTab('archive'));
@@ -605,7 +602,7 @@ export class TaskView extends EditableFileView {
     const dot = el('span', 'zadachi-group-dot');
     dot.setAttribute('aria-hidden', 'true');
     const count = el('span', 'zadachi-group-count');
-    const label = document.createTextNode(this.i18n.t(GROUPS[index].title));
+    const label = node.ownerDocument.createTextNode(this.i18n.t(GROUPS[index].title));
     const toggle = el('button', 'zadachi-group-toggle');
     toggle.type = 'button';
     toggle.setAttribute('aria-expanded', 'true');
@@ -643,6 +640,7 @@ export class TaskView extends EditableFileView {
     entry.check.disabled = blocked || busy;
     entry.check.setAttribute('aria-label', this.i18n.t(archive ? 'restoreTask' : 'completeTask', { title: task.title }));
     entry.title.disabled = blocked || busy;
+    entry.body.classList.toggle('is-disabled', entry.title.disabled);
     setText(entry.title, task.title);
     entry.title.setAttribute('aria-label', this.i18n.t('editTaskLabel', { title: task.title }));
     if (task.note) {
@@ -670,7 +668,7 @@ export class TaskView extends EditableFileView {
       entry.dragHandle?.remove();
       if (!entry.deleteButton) {
         const button = iconButton('', 'trash-2', 'zadachi-delete-archived clickable-icon');
-        button.addEventListener('click', () => this.openArchiveDialog('single', entry!.task));
+        button.addEventListener('click', () => this.openArchiveDialog('single', entry.task));
         entry.deleteButton = button;
       }
       const label = this.i18n.t('deleteArchivedTask', { title: task.title });
@@ -688,7 +686,7 @@ export class TaskView extends EditableFileView {
         label.id = `zadachi-drag-label-${this.viewId}-${++this.nextHandleId}`;
         handle.appendChild(label);
         handle.setAttribute('aria-labelledby', label.id);
-        handle.addEventListener('pointerdown', event => this.startDrag(entry!, event));
+        handle.addEventListener('pointerdown', event => this.startDrag(entry, event));
         // Keep Obsidian's pull-down quick action from handling a drag on this grip.
         handle.addEventListener('touchstart', event => {
           if (!handle.disabled) event.stopPropagation();
@@ -696,7 +694,7 @@ export class TaskView extends EditableFileView {
         handle.addEventListener('keydown', event => {
           if (!event.altKey || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
           event.preventDefault();
-          void this.moveTask(entry!, event.key === 'ArrowUp' ? 'up' : 'down');
+          void this.moveTask(entry, event.key === 'ArrowUp' ? 'up' : 'down');
         });
         entry.dragHandle = handle;
         entry.dragLabel = label;
@@ -715,9 +713,8 @@ export class TaskView extends EditableFileView {
     const row = el('div', 'zadachi-row');
     row.dataset.taskId = task.id;
     const checkTarget = el('label', 'zadachi-check-target');
-    const check = document.createElement('input');
+    const check = el('input', 'zadachi-check');
     check.type = 'checkbox';
-    check.className = 'zadachi-check';
     checkTarget.appendChild(check);
     const body = el('div', 'zadachi-task-body');
     const title = el('button', 'zadachi-task-title');
@@ -827,14 +824,14 @@ export class TaskView extends EditableFileView {
     const row = this.rows.get(task.id);
     if (row) {
       row.title.disabled = true;
+      row.body.classList.add('is-disabled');
       if (row.deleteButton) row.deleteButton.disabled = true;
     }
     try {
       if (task.completedAt !== null) await service.restore(task);
       else {
         const completed = await service.complete(task);
-        const message = document.createDocumentFragment();
-        message.appendChild(document.createTextNode(`${this.i18n.t('taskCompleted')} `));
+        const message = createFragment(fragment => fragment.append(`${this.i18n.t('taskCompleted')} `));
         const undo = el('button', 'zadachi-undo', this.i18n.t('undo'));
         undo.type = 'button';
         undo.addEventListener('click', () => {
@@ -896,8 +893,7 @@ export class TaskView extends EditableFileView {
   }
 
   private showArchiveUndo(removal: ArchiveRemoval, undoInList: (action: (service: TaskService) => Promise<unknown>) => Promise<void>): void {
-    const message = document.createDocumentFragment();
-    message.appendChild(document.createTextNode(`${this.i18n.t('archiveRemoved', { count: removal.tasks.length })} `));
+    const message = createFragment(fragment => fragment.append(`${this.i18n.t('archiveRemoved', { count: removal.tasks.length })} `));
     const undo = el('button', 'zadachi-undo', this.i18n.t('undo'));
     undo.type = 'button';
     undo.addEventListener('click', () => {

@@ -4,10 +4,7 @@ import type { Task, TaskDraft, TaskService } from './types';
 import { createPriorityToggle } from './priority-toggle';
 
 function element<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text?: string): HTMLElementTagNameMap[K] {
-  const el = document.createElement(tag);
-  el.className = cls;
-  if (text !== undefined) el.textContent = text;
-  return el;
+  return createEl(tag, { cls, text });
 }
 
 /** Editing a snapshot lets the store detect a concurrent edit before saving. */

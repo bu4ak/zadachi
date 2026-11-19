@@ -5,8 +5,8 @@ const HEADER_1 = '# Задачи\n<!-- zadachi:version=1 -->\n';
 const HEADER_2 = '# Задачи\n<!-- zadachi:version=2 -->\n';
 const START = '<!-- zadachi:task -->';
 const END = '<!-- zadachi:end -->';
-const punctuation = /[\\`*_{}\[\]()#+\-.!|]/g;
-const escapedPunctuation = /\\([\\`*_{}\[\]()#+\-.!|])/g;
+const punctuation = /[\\`*_{}[\]()#+\-.!|]/g;
+const escapedPunctuation = /\\([\\`*_{}[\]()#+\-.!|])/g;
 
 function escapeTitle(title: string): string {
   return title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(punctuation, '\\$&');

@@ -24,6 +24,19 @@ function configure(el: HTMLElement, options?: string | ElementOptions): void {
 }
 
 export function installObsidianDom(): void {
+  Object.assign(globalThis, {
+    createEl(tag: string, options?: string | ElementOptions) {
+      const element = document.createElement(tag);
+      configure(element, options);
+      return element;
+    },
+    createDiv(options?: string | ElementOptions) { return createEl('div', options); },
+    createFragment(callback?: (fragment: DocumentFragment) => void) {
+      const fragment = document.createDocumentFragment();
+      callback?.(fragment);
+      return fragment;
+    },
+  });
   const proto = HTMLElement.prototype as any;
   proto.createEl = function (tag: string, options?: string | ElementOptions, callback?: (el: HTMLElement) => void) {
     const child = document.createElement(tag);
@@ -40,6 +53,10 @@ export function installObsidianDom(): void {
   };
   proto.empty = function () { this.replaceChildren(); };
   proto.setText = function (text: string) { this.textContent = text; };
+  proto.setCssStyles = function (styles: Partial<CSSStyleDeclaration>) { Object.assign(this.style, styles); };
+  proto.setCssProps = function (props: Record<string, string>) {
+    Object.entries(props).forEach(([name, value]) => this.style.setProperty(name, value));
+  };
   proto.addClass = function (...classes: string[]) { this.classList.add(...classes); };
   proto.removeClass = function (...classes: string[]) { this.classList.remove(...classes); };
   proto.toggleClass = function (name: string, enabled: boolean) { this.classList.toggle(name, enabled); };
