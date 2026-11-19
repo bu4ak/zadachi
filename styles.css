@@ -1,0 +1,352 @@
+.workspace-leaf-content[data-type="zadachi-view"] .view-content {
+  padding: 0;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  container: zadachi-pane / inline-size;
+}
+
+.zadachi-view {
+  --zadachi-border: var(--background-modifier-border);
+  --zadachi-muted: var(--text-muted);
+  padding: 16px;
+  width: 100%;
+  max-width: 1100px;
+  box-sizing: border-box;
+  margin-inline: auto;
+  min-width: 0;
+  color: var(--text-normal);
+}
+
+.zadachi-composer {
+  margin: 0 0 14px;
+  padding: 10px;
+  border: 1px solid var(--zadachi-border);
+  border-radius: var(--radius-m, 8px);
+  background: var(--background-secondary);
+}
+
+.zadachi-composer-entry,
+.zadachi-compose-flags,
+.zadachi-toolbar,
+.zadachi-tabs,
+.zadachi-search,
+.zadachi-group-heading,
+.zadachi-row,
+.zadachi-edit-flags,
+.zadachi-modal-actions {
+  display: flex;
+  align-items: center;
+}
+
+.zadachi-composer-entry { gap: 6px; }
+.zadachi-view .zadachi-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 36px;
+  padding: 4px 7px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s, 4px);
+  color: var(--text-normal);
+  box-shadow: none;
+  background: var(--background-modifier-form-field, var(--background-primary));
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+.zadachi-view .zadachi-input::placeholder { color: var(--text-muted); opacity: 1; }
+.zadachi-view .zadachi-input:hover { border-color: var(--background-modifier-border-hover, var(--text-muted)); }
+.zadachi-view .zadachi-input:focus { border-color: var(--interactive-accent); box-shadow: none; }
+.zadachi-view button:focus-visible,
+.zadachi-view input:focus-visible,
+.zadachi-modal button:focus-visible,
+.zadachi-modal input:focus-visible,
+.zadachi-modal textarea:focus-visible,
+.zadachi-modal a:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+.zadachi-view .zadachi-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  height: 36px;
+  padding: 0 10px;
+}
+.zadachi-add svg, .zadachi-search-toggle svg { width: 18px; height: 18px; }
+.zadachi-add-hint { opacity: .7; font-size: var(--font-ui-smaller); }
+.zadachi-compose-flags { gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+:is(.zadachi-view, .zadachi-edit-modal) .zadachi-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 8px;
+  color: var(--zadachi-muted);
+  background: var(--background-primary);
+  border: 1px solid var(--zadachi-border);
+  border-radius: var(--radius-s, 4px);
+  box-shadow: none;
+  font-size: var(--font-ui-small);
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.zadachi-flag-urgent { --zadachi-flag-color: var(--color-red); }
+.zadachi-flag-important { --zadachi-flag-color: var(--color-orange); }
+:is(.zadachi-view, .zadachi-edit-modal) .zadachi-flag:hover:not(:disabled) {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border-hover, var(--text-muted));
+}
+:is(.zadachi-view, .zadachi-edit-modal) .zadachi-flag[aria-pressed="true"] {
+  color: var(--text-normal);
+  border-color: var(--zadachi-flag-color);
+  background: color-mix(in srgb, var(--zadachi-flag-color) 15%, var(--background-primary));
+}
+:is(.zadachi-view, .zadachi-edit-modal) .zadachi-flag[aria-pressed="true"] .zadachi-flag-icon {
+  color: var(--zadachi-flag-color);
+}
+:is(.zadachi-view, .zadachi-edit-modal) .zadachi-flag[aria-pressed="true"] .zadachi-flag-icon svg { fill: currentColor; }
+:is(.zadachi-view, .zadachi-edit-modal) .zadachi-flag[aria-pressed="true"]:hover:not(:disabled) {
+  border-color: var(--zadachi-flag-color);
+  background: color-mix(in srgb, var(--zadachi-flag-color) 24%, var(--background-primary));
+}
+.zadachi-flag-icon, .zadachi-flag-icon svg { width: 15px; height: 15px; }
+.zadachi-toolbar { justify-content: space-between; gap: 8px; flex-wrap: wrap; padding-bottom: 4px; border-bottom: 1px solid var(--zadachi-border); }
+.zadachi-archive-actions { display: flex; justify-content: flex-end; padding-top: 8px; }
+.zadachi-archive-actions[hidden] { display: none; }
+.zadachi-view .zadachi-clear-archive { min-height: 36px; font-size: var(--font-ui-small); }
+.zadachi-tabs { gap: 4px; min-width: 0; }
+.zadachi-view .zadachi-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 40px;
+  padding: 0 9px;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--zadachi-muted);
+  background: transparent;
+  box-shadow: none;
+}
+.zadachi-view .zadachi-tab.is-active { color: var(--text-normal); border-bottom-color: var(--interactive-accent); }
+.zadachi-tab-count {
+  padding: 1px 5px;
+  border-radius: var(--radius-s, 4px);
+  color: var(--zadachi-muted);
+  background: var(--background-modifier-hover);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+}
+.zadachi-view .zadachi-search-toggle { flex: 0 0 36px; width: 36px; height: 36px; }
+.zadachi-search { flex: 1 0 100%; margin: 4px 0; }
+.zadachi-search[hidden], .zadachi-note-links[hidden], .zadachi-items[hidden] { display: none; }
+.zadachi-view .zadachi-search-input { width: 100%; min-width: 0; }
+.zadachi-status:empty { display: none; }
+.zadachi-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 12px 0;
+  color: var(--zadachi-muted);
+  font-size: var(--font-ui-small);
+}
+.zadachi-status-error, .zadachi-form-error { color: var(--text-error); overflow-wrap: anywhere; }
+.zadachi-group { margin-top: 16px; }
+.zadachi-group-heading {
+  gap: 7px;
+  margin: 0 0 7px;
+  color: var(--zadachi-muted);
+  font-size: var(--font-ui-small);
+  font-weight: var(--font-semibold, 600);
+  line-height: 1.3;
+}
+.zadachi-view .zadachi-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 28px;
+  padding: 2px 4px;
+  margin-left: -4px;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+  cursor: pointer;
+}
+.zadachi-view .zadachi-group-toggle:hover:not(:disabled) { color: var(--text-normal); background: var(--background-modifier-hover); }
+.zadachi-group-chevron, .zadachi-group-chevron svg { width: 13px; height: 13px; flex: 0 0 13px; }
+.zadachi-group-toggle[aria-expanded="false"] .zadachi-group-chevron { transform: rotate(-90deg); }
+.zadachi-group-dot { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); }
+.zadachi-group-first .zadachi-group-dot { background: var(--color-red); }
+.zadachi-group-urgent .zadachi-group-dot { background: var(--color-red); }
+.zadachi-group-important .zadachi-group-dot { background: var(--color-orange); }
+.zadachi-group-count { color: var(--text-faint); font-weight: var(--font-normal, 400); }
+.zadachi-items {
+  overflow: hidden;
+  border: 1px solid var(--zadachi-border);
+  border-radius: var(--radius-m, 8px);
+  background: var(--background-secondary);
+}
+.zadachi-archive-items { margin-top: 14px; }
+.zadachi-row { min-height: 44px; gap: 4px; padding: 4px; border-top: 1px solid transparent; }
+.zadachi-row + .zadachi-row { border-top: 1px solid var(--zadachi-border); }
+.zadachi-check-target {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+.zadachi-view .zadachi-check { flex: 0 0 auto; margin: 0; cursor: pointer; }
+.zadachi-task-body { flex: 1 1 auto; min-width: 0; padding: 0 6px 0 4px; border-radius: var(--radius-s, 4px); cursor: pointer; }
+.zadachi-task-body:hover, .zadachi-task-body:focus-within { background: var(--background-modifier-hover); }
+.zadachi-row:has(.zadachi-task-title:disabled) .zadachi-task-body { cursor: default; }
+.zadachi-view .zadachi-drag-handle {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.zadachi-drag-handle svg { width: 16px; height: 16px; }
+.zadachi-view .zadachi-drag-handle:active { cursor: grabbing; }
+/* Keep the real row at its original width while neighbours reserve its new position. */
+.zadachi-row.is-dragging {
+  border: 1px solid var(--interactive-accent);
+  border-radius: var(--radius-m, 8px);
+  background: var(--background-secondary);
+  box-shadow: var(--shadow-s);
+  cursor: grabbing;
+  user-select: none;
+}
+.zadachi-drag-placeholder {
+  box-sizing: border-box;
+  border: 1px dashed var(--interactive-accent);
+  border-radius: var(--radius-s, 4px);
+  background: var(--background-modifier-hover);
+}
+.zadachi-drag-placeholder + .zadachi-row { border-top-color: transparent; }
+.zadachi-row.is-dragging + .zadachi-row { border-top: 1px solid var(--zadachi-border); }
+.zadachi-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.zadachi-view .zadachi-delete-archived { flex: 0 0 36px; width: 36px; height: 36px; }
+.zadachi-delete-archived svg { width: 16px; height: 16px; }
+.zadachi-view .zadachi-task-title {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 30px;
+  padding: 2px 0;
+  color: var(--text-normal);
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+.zadachi-view .zadachi-task-title:hover { color: var(--text-accent); }
+.zadachi-task-note {
+  overflow: hidden;
+  color: var(--zadachi-muted);
+  font-size: var(--font-ui-smaller);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.zadachi-task-date { display: block; color: var(--text-faint); font-size: var(--font-ui-smaller); }
+.zadachi-empty { padding: 24px 4px; color: var(--zadachi-muted); font-size: var(--font-ui-small); }
+.zadachi-undo { margin-left: 4px; }
+
+.zadachi-edit-modal {
+  --zadachi-border: var(--background-modifier-border);
+  --zadachi-muted: var(--text-muted);
+  width: 580px;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  padding: 24px;
+}
+.zadachi-edit-modal .modal-title {
+  margin: 0 24px 20px 0;
+  font-size: var(--font-ui-large, 18px);
+  font-weight: var(--font-semibold, 600);
+  line-height: 1.35;
+}
+.zadachi-edit-modal .modal-content { margin: 0; }
+.zadachi-edit-form { display: flex; flex-direction: column; gap: 18px; }
+.zadachi-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small, 13px);
+  font-weight: var(--font-medium, 500);
+}
+.zadachi-edit-modal .zadachi-edit-title,
+.zadachi-edit-modal .zadachi-edit-note {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s, 4px);
+  background: var(--background-modifier-form-field, var(--background-secondary));
+  color: var(--text-normal);
+  font-size: var(--font-ui-medium, 14px);
+  font-weight: var(--font-normal, 400);
+  box-shadow: none;
+}
+.zadachi-edit-modal .zadachi-edit-title { height: 40px; padding: 8px 10px; }
+.zadachi-edit-modal .zadachi-edit-note {
+  min-height: 132px;
+  max-height: 40vh;
+  resize: vertical;
+  padding: 10px;
+  line-height: 1.5;
+}
+.zadachi-edit-modal .zadachi-edit-note::placeholder { color: var(--text-muted); opacity: 1; }
+.zadachi-edit-modal :is(.zadachi-edit-title, .zadachi-edit-note):hover { border-color: var(--background-modifier-border-hover, var(--text-muted)); }
+.zadachi-edit-modal :is(.zadachi-edit-title, .zadachi-edit-note):focus { border-color: var(--interactive-accent); }
+.zadachi-edit-flags { gap: 8px; flex-wrap: wrap; }
+.zadachi-edit-modal .zadachi-flag { height: 36px; padding: 0 10px; }
+.zadachi-priority-field { display: flex; flex-direction: column; gap: 8px; }
+.zadachi-edit-modal .zadachi-modal-actions {
+  margin-top: 2px;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+  gap: 8px;
+}
+.zadachi-edit-modal .zadachi-modal-actions button { min-height: 36px; padding: 0 14px; }
+.zadachi-note-links { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: var(--font-ui-small); }
+.zadachi-note-link { overflow-wrap: anywhere; }
+.zadachi-form-error:empty { display: none; }
+.zadachi-list-path-hint { color: var(--text-muted); font-size: var(--font-ui-small); line-height: 1.5; }
+.zadachi-modal-actions { justify-content: flex-end; gap: 8px; }
+
+@container zadachi-pane (min-width: 640px) {
+  .zadachi-search, .zadachi-search[hidden] { display: flex; flex: 0 1 260px; margin: 0; }
+  .zadachi-view .zadachi-search-toggle { display: none; }
+}
+@container zadachi-pane (max-width: 479px) {
+  .zadachi-view { padding: 10px; }
+  .zadachi-add-label, .zadachi-add-hint { display: none; }
+  .zadachi-view .zadachi-add { width: 36px; padding: 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zadachi-view .zadachi-input, :is(.zadachi-view, .zadachi-edit-modal) .zadachi-flag { transition: none; }
+}
+@media (max-width: 480px) {
+  .zadachi-edit-modal { padding: 20px 16px; }
+  .zadachi-edit-form { gap: 16px; }
+}
+@media (max-width: 320px) {
+  .zadachi-view { padding: 8px; }
+  .zadachi-view .zadachi-tab { padding: 0 6px; }
+}
+
+.is-mobile .zadachi-check-target { flex-basis: 44px; width: 44px; height: 44px; }
+.is-mobile .zadachi-view .zadachi-delete-archived { flex-basis: 44px; width: 44px; height: 44px; }
+.is-mobile .zadachi-view .zadachi-drag-handle { flex-basis: 44px; width: 44px; height: 44px; }

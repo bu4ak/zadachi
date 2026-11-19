@@ -1,0 +1,7 @@
+/node_modules/
+/.obsidian/
+/main.js
+/coverage/
+/dist/
+/test-vault/
+.DS_Store
