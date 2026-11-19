@@ -689,6 +689,10 @@ export class TaskView extends EditableFileView {
         handle.appendChild(label);
         handle.setAttribute('aria-labelledby', label.id);
         handle.addEventListener('pointerdown', event => this.startDrag(entry!, event));
+        // Keep Obsidian's pull-down quick action from handling a drag on this grip.
+        handle.addEventListener('touchstart', event => {
+          if (!handle.disabled) event.stopPropagation();
+        }, { passive: true });
         handle.addEventListener('keydown', event => {
           if (!event.altKey || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
           event.preventDefault();

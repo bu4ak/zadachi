@@ -253,6 +253,31 @@ async function openView(service: FakeService, i18n?: I18n): Promise<TaskView> {
 }
 
 describe('Панель задач', () => {
+  it('оставляет свайпы Obsidian вне доступной ручки перетаскивания', async () => {
+    const service = new FakeService();
+    service.emit([
+      task({ id: 'a' }),
+      task({ id: 'b' }),
+      task({ id: 'c', urgent: true }),
+    ]);
+    const view = await openView(service);
+    const reachedHost = vi.fn();
+    view.containerEl.addEventListener('touchstart', reachedHost);
+    const touch = () => new Event('touchstart', { bubbles: true, cancelable: true });
+    const activeHandle = view.containerEl.querySelector<HTMLButtonElement>('[data-task-id="a"] .zadachi-drag-handle')!;
+    const disabledHandle = view.containerEl.querySelector<HTMLButtonElement>('[data-task-id="c"] .zadachi-drag-handle')!;
+    const title = view.containerEl.querySelector<HTMLButtonElement>('[data-task-id="a"] .zadachi-task-title')!;
+
+    expect(activeHandle.disabled).toBe(false);
+    expect(disabledHandle.disabled).toBe(true);
+    expect(activeHandle.dispatchEvent(touch())).toBe(true);
+    expect(reachedHost).not.toHaveBeenCalled();
+    disabledHandle.dispatchEvent(touch());
+    title.dispatchEvent(touch());
+    expect(reachedHost).toHaveBeenCalledTimes(2);
+    await view.onClose();
+  });
+
   it('сохраняет визуальный порядок до ответа записи и возвращает прежний при ошибке', async () => {
     const service = new FakeService();
     const a = task({ id: 'a', title: 'Первая' });
