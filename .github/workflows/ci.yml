@@ -18,6 +18,15 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+          fetch-depth: ${{ github.ref_type == 'tag' && '0' || '1' }}
+      - name: Check release tag
+        if: github.ref_type == 'tag'
+        run: |
+          if ! git merge-base --is-ancestor HEAD refs/remotes/origin/master; then
+            echo 'Release tags must point to a commit in master.' >&2
+            exit 1
+          fi
+          node -e 'const { version } = require("./manifest.json"); if (!/^\d+\.\d+\.\d+$/.test(version) || version !== process.env.GITHUB_REF_NAME) throw new Error("Release tag must match the manifest version (x.y.z)");'
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -25,9 +34,6 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - name: Check release tag
-        if: github.ref_type == 'tag'
-        run: node -e 'const m = require("./manifest.json"); if (m.version !== process.env.GITHUB_REF_NAME) throw new Error("Tag must match manifest version");'
       - name: Save release files
         if: github.ref_type == 'tag'
         uses: actions/upload-artifact@v7
@@ -56,3 +62,32 @@ jobs:
           subject-path: |
             main.js
             styles.css
+
+  publish-release:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: attest-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency: release-${{ github.ref }}
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: zadachi-release
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release_tag="$GITHUB_REF_NAME"
+          release_files=(main.js manifest.json styles.css)
+          if is_draft=$(gh release view "$release_tag" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft); then
+            if [[ "$is_draft" == false ]]; then
+              echo "Release $release_tag is already published."
+              exit 0
+            fi
+            gh release upload "$release_tag" "${release_files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$release_tag" --draft=false --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$release_tag" "${release_files[@]}" --verify-tag --generate-notes \
+              --title "Zadachi $release_tag" --repo "$GITHUB_REPOSITORY"
+          fi
