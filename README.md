@@ -6,7 +6,7 @@ English · [Русский](README.ru.md)
 
 Create a task list in any folder, give it a name, and start adding tasks. Each list is a Markdown note you can move or rename.
 
-Mark a task **Urgent**, **Important**, both, or neither. Zadachi sorts tasks into four groups based on [Stephen Covey’s time management matrix](https://mp.franklincovey.com/habit-3/).
+Mark a task **Urgent**, **Important**, both, or neither. Zadachi sorts tasks into the four groups of the [Eisenhower matrix](https://en.wikipedia.org/wiki/Time_management#Eisenhower_method), a method popularized by Stephen Covey.
 
 ![Zadachi showing a project task list, priority groups, and an archive tab](docs/media/task-list.png)
 
