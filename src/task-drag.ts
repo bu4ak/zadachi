@@ -35,8 +35,6 @@ export class TaskDrag {
   private readonly group: HTMLElement | null;
   private readonly nextSibling: ChildNode | null;
   private readonly originalStyle: string | null;
-  private readonly scrollAnchor: string;
-  private readonly scrollAnchorPriority: string;
   private sourceRect: DOMRect | null = null;
   private slot = 0;
   private target: DropTarget | null = null;
@@ -53,8 +51,6 @@ export class TaskDrag {
     this.group = source.node.parentElement;
     this.nextSibling = source.node.nextSibling;
     this.originalStyle = source.node.getAttribute('style');
-    this.scrollAnchor = scrollHost.style.getPropertyValue('overflow-anchor');
-    this.scrollAnchorPriority = scrollHost.style.getPropertyPriority('overflow-anchor');
     this.slot = rows.findIndex(row => row.id === source.id);
     this.doc = handle.ownerDocument;
     this.win = this.doc.defaultView;
@@ -126,18 +122,16 @@ export class TaskDrag {
     if (!this.group) return;
     const node = this.source.node;
     this.sourceRect = node.getBoundingClientRect();
-    const gap = this.doc.createElement('div');
-    gap.className = 'zadachi-drag-placeholder';
-    gap.setAttribute('aria-hidden', 'true');
-    gap.style.height = `${this.sourceRect.height}px`;
+    const gap = createDiv({ cls: 'zadachi-drag-placeholder', attr: { 'aria-hidden': 'true' } });
+    gap.setCssStyles({ height: `${this.sourceRect.height}px` });
     this.group.insertBefore(gap, node);
     this.placeholder = gap;
-    this.scrollHost.style.setProperty('overflow-anchor', 'none');
+    this.scrollHost.classList.add('zadachi-drag-active');
     node.classList.add('is-dragging');
-    Object.assign(node.style, {
-      position: 'fixed', top: `${this.sourceRect.top}px`, left: `${this.sourceRect.left}px`,
+    node.style.removeProperty('transform');
+    node.setCssStyles({
+      top: `${this.sourceRect.top}px`, left: `${this.sourceRect.left}px`,
       width: `${this.sourceRect.width}px`, height: `${this.sourceRect.height}px`,
-      margin: '0', boxSizing: 'border-box', pointerEvents: 'none', zIndex: '1000',
     });
   }
 
@@ -152,8 +146,7 @@ export class TaskDrag {
       node.classList.remove('is-dragging');
       if (this.originalStyle === null) node.removeAttribute('style');
       else node.setAttribute('style', this.originalStyle);
-      if (this.scrollAnchor) this.scrollHost.style.setProperty('overflow-anchor', this.scrollAnchor, this.scrollAnchorPriority);
-      else this.scrollHost.style.removeProperty('overflow-anchor');
+      this.scrollHost.classList.remove('zadachi-drag-active');
       if (focused) this.handle.focus({ preventScroll: true });
     }
     this.placeholder = null;
@@ -177,9 +170,9 @@ export class TaskDrag {
     const node = this.source.node;
     // Obsidian panes can establish a containing block for fixed descendants.
     // Measure its real origin instead of treating viewport coordinates as local ones.
-    node.style.transform = 'none';
+    node.style.removeProperty('--zadachi-drag-offset');
     const fixedRect = node.getBoundingClientRect();
-    node.style.transform = `translate3d(${this.x - this.grabX - fixedRect.left}px, ${this.y - this.grabY - fixedRect.top}px, 0)`;
+    node.setCssProps({ '--zadachi-drag-offset': `translate3d(${this.x - this.grabX - fixedRect.left}px, ${this.y - this.grabY - fixedRect.top}px, 0)` });
     const rect = this.group?.getBoundingClientRect();
     const panel = this.scrollHost.getBoundingClientRect();
     const inside = rect && this.x >= rect.left && this.x <= rect.right && this.x >= panel.left && this.x <= panel.right &&

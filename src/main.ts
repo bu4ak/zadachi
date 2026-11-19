@@ -103,7 +103,7 @@ export default class ZadachiPlugin extends Plugin {
     this.stores.clear();
   }
 
-  acquireFileStore(file: TFile): { service: TaskStore; release(): void } {
+  acquireFileStore(file: TFile): { service: TaskStore; release: () => void } {
     this.taskFiles.add(file);
     let entry = this.stores.get(file);
     if (!entry) {
@@ -127,9 +127,9 @@ export default class ZadachiPlugin extends Plugin {
   }
 
   async openTasks(tab: TaskTab, focus = false): Promise<void> {
-    const active = this.app.workspace.activeLeaf;
+    const active = this.app.workspace.getActiveViewOfType(TaskView);
     const activeFile = this.app.workspace.getActiveFile();
-    const file = active?.view instanceof TaskView ? active.view.file :
+    const file = active ? active.file :
       activeFile && this.taskFiles.has(activeFile) ? activeFile : null;
     if (file) return this.openFile(file, tab, focus);
     const path = validateStoragePath(this.settings.storagePath);
@@ -261,7 +261,9 @@ export default class ZadachiPlugin extends Plugin {
       try {
         await service.load();
         const snapshot = service.getSnapshot();
-        if (snapshot.error) throw snapshot.errorCause ?? new Error(snapshot.error);
+        if (snapshot.error) {
+          throw snapshot.errorCause instanceof Error ? snapshot.errorCause : new Error(snapshot.error);
+        }
         const next = { ...this.settings, storagePath: path };
         await this.saveData(next);
         this.settings = next;
@@ -300,16 +302,34 @@ class ZadachiSettingTab extends PluginSettingTab {
     super(app, plugin);
   }
 
-  display(): void {
+  getSettingDefinitions() {
+    const { i18n } = this.plugin;
+    return [
+      { name: i18n.t('language'), desc: i18n.t('languageDescription'), render: (setting: Setting) => this.renderLanguage(setting) },
+      { name: i18n.t('storageFile'), desc: i18n.t('storageDescription', { path: DEFAULT_PATH }), render: (setting: Setting) => this.renderStorage(setting) },
+      { name: i18n.t('openStorage'), desc: i18n.t('openStorageDescription'), render: (setting: Setting) => this.renderOpenStorage(setting) },
+    ];
+  }
+
+  // Obsidian versions before 1.13 use the same rows through the legacy entry point.
+  display(): void { this.renderLegacySettings(); }
+
+  private refreshSettings(): void {
+    if ('update' in this && typeof this.update === 'function') this.update();
+    else this.renderLegacySettings();
+  }
+
+  private renderLegacySettings(): void {
     const { containerEl } = this;
-    const {i18n} = this.plugin;
     containerEl.empty();
-    let draft = this.pathDraft ?? this.plugin.settings.storagePath;
-    let saving = false;
-    new Setting(containerEl)
-      .setName(i18n.t('language'))
-      .setDesc(i18n.t('languageDescription'))
-      .addDropdown((dropdown) => dropdown
+    for (const definition of this.getSettingDefinitions()) {
+      definition.render(new Setting(containerEl).setName(definition.name).setDesc(definition.desc));
+    }
+  }
+
+  private renderLanguage(setting: Setting): void {
+    const { i18n } = this.plugin;
+    setting.addDropdown((dropdown) => dropdown
         .addOption('auto', i18n.t('languageAuto'))
         .addOption('ru', i18n.t('languageRussian'))
         .addOption('en', i18n.t('languageEnglish'))
@@ -318,7 +338,7 @@ class ZadachiSettingTab extends PluginSettingTab {
           dropdown.setDisabled(true);
           try {
             await this.plugin.changeLanguage(value as LanguagePreference);
-            this.display();
+            this.refreshSettings();
           } catch (error) {
             dropdown.setValue(this.plugin.settings.language);
             this.plugin.showError(error);
@@ -326,10 +346,14 @@ class ZadachiSettingTab extends PluginSettingTab {
             dropdown.setDisabled(false);
           }
         }));
-    const setting = new Setting(containerEl)
-      .setName(i18n.t('storageFile'))
-      .setDesc(i18n.t('storageDescription', {path: DEFAULT_PATH}))
-      .addText((text) => text
+    setting.controlEl.querySelector('select')?.setAttribute('aria-label', i18n.t('language'));
+  }
+
+  private renderStorage(setting: Setting): void {
+    const { i18n } = this.plugin;
+    let draft = this.pathDraft ?? this.plugin.settings.storagePath;
+    let saving = false;
+    setting.addText((text) => text
         .setPlaceholder(DEFAULT_PATH)
         .setValue(draft)
         .onChange((value) => { draft = value; this.pathDraft = value; }))
@@ -344,7 +368,7 @@ class ZadachiSettingTab extends PluginSettingTab {
             await this.plugin.changeStoragePath(draft);
             this.pathDraft = null;
             new Notice(`${i18n.t('pluginName')}: ${i18n.t('storageSelected')}`);
-            this.display();
+            this.refreshSettings();
           } catch (error) {
             this.plugin.showError(error);
           } finally {
@@ -353,11 +377,11 @@ class ZadachiSettingTab extends PluginSettingTab {
           }
         }));
     setting.controlEl.querySelector('input')?.setAttribute('aria-label', i18n.t('storagePathLabel'));
-    containerEl.querySelector('select')?.setAttribute('aria-label', i18n.t('language'));
-    new Setting(containerEl)
-      .setName(i18n.t('openStorage'))
-      .setDesc(i18n.t('openStorageDescription'))
-      .addButton((button) => button
+  }
+
+  private renderOpenStorage(setting: Setting): void {
+    const { i18n } = this.plugin;
+    setting.addButton((button) => button
         .setButtonText(i18n.t('openFile'))
         .onClick(async () => {
           const file = this.app.vault.getAbstractFileByPath(this.plugin.settings.storagePath);

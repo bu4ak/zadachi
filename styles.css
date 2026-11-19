@@ -204,7 +204,7 @@
 .zadachi-view .zadachi-check { flex: 0 0 auto; margin: 0; cursor: pointer; }
 .zadachi-task-body { flex: 1 1 auto; min-width: 0; padding: 0 6px 0 4px; border-radius: var(--radius-s, 4px); cursor: pointer; }
 .zadachi-task-body:hover, .zadachi-task-body:focus-within { background: var(--background-modifier-hover); }
-.zadachi-row:has(.zadachi-task-title:disabled) .zadachi-task-body { cursor: default; }
+.zadachi-task-body.is-disabled { cursor: default; }
 .zadachi-view .zadachi-drag-handle {
   flex: 0 0 36px;
   width: 36px;
@@ -216,8 +216,15 @@
 }
 .zadachi-drag-handle svg { width: 16px; height: 16px; }
 .zadachi-view .zadachi-drag-handle:active { cursor: grabbing; }
+.zadachi-drag-active { overflow-anchor: none; }
 /* Keep the real row at its original width while neighbours reserve its new position. */
 .zadachi-row.is-dragging {
+  position: fixed;
+  margin: 0;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 1000;
+  transform: var(--zadachi-drag-offset, none);
   border: 1px solid var(--interactive-accent);
   border-radius: var(--radius-m, 8px);
   background: var(--background-secondary);

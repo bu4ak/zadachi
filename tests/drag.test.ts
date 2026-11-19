@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TaskDrag, type DragRow } from '../src/task-drag';
+import { installObsidianDom } from './obsidian-mock';
 
 function rect(top: number, bottom: number, left = 0, right = 600): DOMRect {
   return { x: left, y: top, top, bottom, left, right, width: right - left, height: bottom - top, toJSON: () => ({}) } as DOMRect;
@@ -43,7 +44,7 @@ function liveFixture(grabY: number) {
   const source = f.rows[1].node;
   for (const row of f.rows) {
     row.node.getBoundingClientRect = () => {
-      const flow = [...f.group.children].filter(element => element !== source || source.style.position !== 'fixed');
+      const flow = [...f.group.children].filter(element => element !== source || !source.classList.contains('is-dragging'));
       const index = flow.indexOf(row.node);
       return rect(100 + index * 40, 140 + index * 40);
     };
@@ -51,7 +52,7 @@ function liveFixture(grabY: number) {
   const start = () => new TaskDrag(f.handle, f.rows[1], f.rows, f.panel, pointer('pointerdown', 30, grabY), f.onDrop, f.onEnd);
   return { ...f, start };
 }
-beforeEach(() => document.body.replaceChildren());
+beforeEach(() => { document.body.replaceChildren(); installObsidianDom(); });
 afterEach(() => document.body.replaceChildren());
 
 describe('Перетаскивание указателем', () => {
@@ -70,10 +71,10 @@ describe('Перетаскивание указателем', () => {
     expect(placeholder).toBeDefined();
     expect(placeholder?.style.height).toBe('40px');
     expect(f.flowOrder()).toEqual([placeholder, f.rows[0].node, f.rows[2].node]);
-    expect(f.rows[1].node.style.position).toBe('fixed');
-    const transform = f.rows[1].node.style.transform;
+    expect(f.rows[1].node.classList.contains('is-dragging')).toBe(true);
+    const transform = f.rows[1].node.style.getPropertyValue('--zadachi-drag-offset');
     document.dispatchEvent(pointer('pointermove', 30, 95));
-    expect(f.rows[1].node.style.transform).not.toBe(transform);
+    expect(f.rows[1].node.style.getPropertyValue('--zadachi-drag-offset')).not.toBe(transform);
     expect(document.querySelector('.zadachi-drag-ghost')).toBeNull();
     document.dispatchEvent(pointer('pointerup', 30, 95));
     expect(f.onDrop).toHaveBeenCalledExactlyOnceWith({ anchorId: 'one', direction: 'up' });
@@ -87,15 +88,15 @@ describe('Перетаскивание указателем', () => {
     const node = f.rows[1].node;
     const original = rect(140, 180);
     let scrolled = 0;
-    node.getBoundingClientRect = () => node.style.position === 'fixed'
+    node.getBoundingClientRect = () => node.classList.contains('is-dragging')
       ? rect(260 - scrolled, 300 - scrolled, 150, 750) : original;
     new TaskDrag(f.handle, f.rows[1], f.rows, f.panel, pointer('pointerdown', x, y), f.onDrop, f.onEnd);
     document.dispatchEvent(pointer('pointermove', x - 10, y - 40));
     // The same grabbed point must land at the current pointer, even with a fixed containing block.
-    expect(node.style.transform).toBe('translate3d(-160px, -160px, 0)');
+    expect(node.style.getPropertyValue('--zadachi-drag-offset')).toBe('translate3d(-160px, -160px, 0)');
     scrolled = 25;
     document.dispatchEvent(pointer('pointermove', x - 20, y - 50));
-    expect(node.style.transform).toBe('translate3d(-170px, -145px, 0)');
+    expect(node.style.getPropertyValue('--zadachi-drag-offset')).toBe('translate3d(-170px, -145px, 0)');
     document.dispatchEvent(pointer('pointercancel', x - 20, y - 50));
     expect(node.hasAttribute('style')).toBe(false);
   });

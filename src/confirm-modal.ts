@@ -26,20 +26,12 @@ export class ArchiveConfirmModal extends Modal {
   onOpen(): void {
     this.modalEl.addClass('zadachi-confirm-modal');
     this.contentEl.empty();
-    const description = document.createElement('p');
-    const error = document.createElement('div');
-    error.className = 'zadachi-form-error';
-    error.setAttribute('role', 'alert');
-    const actions = document.createElement('div');
-    actions.className = 'zadachi-modal-actions';
-    const cancel = document.createElement('button');
-    cancel.type = 'button';
+    const description = this.contentEl.createEl('p');
+    const error = this.contentEl.createDiv({ cls: 'zadachi-form-error', attr: { role: 'alert' } });
+    const actions = this.contentEl.createDiv('zadachi-modal-actions');
+    const cancel = actions.createEl('button', { attr: { type: 'button' } });
     cancel.addEventListener('click', () => this.close());
-    const confirm = document.createElement('button');
-    confirm.type = 'button';
-    confirm.className = 'mod-warning zadachi-confirm-delete';
-    actions.append(cancel, confirm);
-    this.contentEl.append(description, error, actions);
+    const confirm = actions.createEl('button', { attr: { type: 'button' }, cls: 'mod-warning zadachi-confirm-delete' });
 
     let errorReason: unknown = null;
     const updateLocale = () => {
